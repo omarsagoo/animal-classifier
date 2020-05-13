@@ -83,8 +83,11 @@ class Clasifier:
                 rows.append(list(row))
         
         gain, question = self.find_split(rows)
-
+        
+        # Ask questions until we arrive at an answer
+        question_num = 1
         while True:
+            print('Questions {}:'.format(question_num))
             answer = input(question)
             true_list, false_list = self.partition(question, rows)
             if answer == "yes":
@@ -92,7 +95,17 @@ class Clasifier:
             elif answer == "no":
                 rows = false_list
             gain, question = self.find_split(rows)
-
+            question_num += 1
+            
+            # End conditions
+            if len(rows) == 1 or question_num >= 20:
+                final = input("Final Guess: Is it a... {}?!(yes or no)".format(rows[0]))
+                if final == "yes":
+                    print("The Gini index wins this round...")
+                    return False
+                elif final == "no":
+                    print("Congratulations, you've beat the system!")
+                    return False
 
     def gini_index(self, rows):
         """Calculates the gini index of all of the rows in the dataset.
@@ -146,6 +159,7 @@ class Clasifier:
         optimal_question = None
 
         # iterates the number of times there are attributes
+        # TODO: This throws an error if there's no rows left, add 0 rows case
         for column in range(len(rows[1])):
             # 0 index is the name of the row, we do not want to calculate that into the gain
             if column == 0:
@@ -174,7 +188,7 @@ class Clasifier:
                 # finds max gain, when it is found, update the optimal question and the max_gain variable
                 if gain > max_gain:
                     max_gain = gain
-                    print(max_gain)
+                    # print(max_gain)
                     optimal_question = question
 
         # return the max gain and optimal question as a tuple
@@ -218,8 +232,11 @@ class Question:
 
     def __repr__(self):
         """Returns a string representation of the question when printed"""
-        print(self.header)
-        return f"is {self.header[self.column]} {bool(self.value)}? (format yes/no) "
+        # print(self.header)
+        if bool(self.value) == True:
+            return "Does your animal have (a) {}? (format yes/no)".format(self.header(self.column))
+        elif bool(self.value) == False:
+            return "Does your animal NOT have (a) {}? (format yes/no)".format(self.header(self.column))
 
     def answer(self, response):
         """Answers the question based on the response given.
@@ -239,12 +256,18 @@ class Question:
 
 
 if __name__ == "__main__":
+    print("Welcome to a game of 20 questions where the system tries to determine what you're thinking of using the Gini Index!\n")
     classify = Clasifier("zoo.csv")
-    print(classify.header)
+    # print(classify.header)
     # pprint(classify.gini_histo)
     
     # print(len(classify.partition(q)[0]), len(classify.partition(q)[1]))
     # classify.gini(classify.partition(q)[0])
     classify.ask()
     
+    # When the program is run, it activates like this:
+    # 1: Create new classifier object
+    # 2: Run classify.ask(), our main function
+    # 3: Read the csv file and headers
+    # 4: Ask questions until either 20 have been asked, or 
     
