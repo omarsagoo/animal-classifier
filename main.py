@@ -8,7 +8,7 @@ class Clasifier:
         self.filename = filename
         #  instantiate the header as an empty list. the header is the first row in the file.
         self.header = []
-    
+
     def unique_vals(self,column, rows):
         """Returns a set of all the unique values in each column, most are binary ( 1, 0)
             This is used to check the gain on every value in the data set.
@@ -42,7 +42,7 @@ class Clasifier:
             if key not in columns:
                 columns[key] = 0
             columns[key] += 1
-                
+
         return columns
 
     def partition(self, question, rows):
@@ -81,10 +81,9 @@ class Clasifier:
             for row in csvread:
                 # print(row)
                 rows.append(list(row))
-        
+
         # self.gini_histo = self.gini(rows)
         print(self.find_split(rows))
-
 
     def gini_index(self, rows):
         """Calculates the gini index of all of the rows in the dataset.
@@ -115,7 +114,7 @@ class Clasifier:
             # decrements the probability squared from the gini index, this creates the impurity of the data set.
             #  if 1/10 chance of everything being picked, gini index of .9
             gini -= probability**2
-        
+
         # returns the gini index
         return gini
 
@@ -145,11 +144,11 @@ class Clasifier:
 
             # finds all the unique values for that column and adds them into a set.
             uniques = self.unique_vals(column, rows)
-            
+
             # iterates through all the unique values and creates questions based off of them
             for val in uniques:
                 question = Question(self.header, column, val)
-                
+
                 # partitions the question into a list of all the questions where it is true, and where it is false
                 true_rows, false_rows = self.partition(question, rows)
 
@@ -165,10 +164,10 @@ class Clasifier:
                 if gain > max_gain:
                     max_gain = gain
                     optimal_question = question
-                
+
         # return the max gain and optimal question as a tuple
         return max_gain, optimal_question
-    
+
     def information_gain(self, true, false, uncertainty):
         """Method to calculate the Information gain of a question in order to decide the most optimal to use.
             Time Complexity:
@@ -202,7 +201,7 @@ class Question:
                 column  - int, the index of the column for the attribute that is being asked about.
                 value     - the value of the question, i.e. True or False  """
         self.column = column
-        self.value = value        
+        self.value = value
         self.header = header
 
     def __repr__(self):
@@ -224,7 +223,7 @@ class Question:
         if val == self.value:
             return True
         return False
-    
+
 
 if __name__ == "__main__":
     classify = Clasifier("zoo.csv")
