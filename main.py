@@ -55,7 +55,8 @@ class Clasifier:
                         (n - true_rows) + (n - false_rows) where true_rows + false_rows = n
         Args:
             question  - Question object; the question to be asked
-            rows        - the rows to be searched for all the correct answers
+            rows        - All the rows to be searched for all the correct answers,
+                            initially every single row in the dataset.
         Return:
             tuple(true_rows, false_rows) - tuple([], []); a tuple of two arrays. tuple[0] being all the rows that
                                                             were true, tuple[1] all rows that are false."""
@@ -76,14 +77,22 @@ class Clasifier:
         """Method that asks the questions"""
         with open(self.filename, newline="") as csvfile:
             csvread = csv.reader(csvfile)
-            self.header = csvread.__next__()
+            self.header = list(csvread.__next__())
             rows = []
             for row in csvread:
-                # print(row)
                 rows.append(list(row))
+        
+        gain, question = self.find_split(rows)
 
-        # self.gini_histo = self.gini(rows)
-        print(self.find_split(rows))
+        while True:
+            answer = input(question)
+            true_list, false_list = self.partition(question, rows)
+            if answer == "yes":
+                rows = true_list
+            elif answer == "no":
+                rows = false_list
+            gain, question = self.find_split(rows)
+
 
     def gini_index(self, rows):
         """Calculates the gini index of all of the rows in the dataset.
@@ -141,6 +150,8 @@ class Clasifier:
             # 0 index is the name of the row, we do not want to calculate that into the gain
             if column == 0:
                 continue
+            if column == 13:
+                continue
 
             # finds all the unique values for that column and adds them into a set.
             uniques = self.unique_vals(column, rows)
@@ -163,6 +174,7 @@ class Clasifier:
                 # finds max gain, when it is found, update the optimal question and the max_gain variable
                 if gain > max_gain:
                     max_gain = gain
+                    print(max_gain)
                     optimal_question = question
 
         # return the max gain and optimal question as a tuple
@@ -206,7 +218,8 @@ class Question:
 
     def __repr__(self):
         """Returns a string representation of the question when printed"""
-        return f"is {self.header[self.column]} {bool(self.value)}? "
+        print(self.header)
+        return f"is {self.header[self.column]} {bool(self.value)}? (format yes/no) "
 
     def answer(self, response):
         """Answers the question based on the response given.
@@ -227,9 +240,11 @@ class Question:
 
 if __name__ == "__main__":
     classify = Clasifier("zoo.csv")
-    # q = Question(classify.header, 3, "1")
+    print(classify.header)
     # pprint(classify.gini_histo)
-    # print(q)
+    
     # print(len(classify.partition(q)[0]), len(classify.partition(q)[1]))
     # classify.gini(classify.partition(q)[0])
     classify.ask()
+    
+    
